@@ -4,23 +4,19 @@ const urlProductos = 'https://localhost:7221/Producto/';
 
 async function GetProductos() {
     $('ul').empty();
-    await fetch(urlProductos
-    ).then((response) => {
-        return response.json();
-    })
-        .then((data) => {
-            var table = document.createElement('table');
-            data.map(function (producto) {
-                let columna = productoAColumna(producto)
-                table.appendChild(columna);
-                list.appendChild(table);
-            });
-        })
+    const response = await fetch(urlProductos);
+    const data = await response.json();
+    var table = document.createElement('table');
+    data.map(function (producto) {
+        let columna = productoAColumna(producto)
+        table.appendChild(columna);
+        list.appendChild(table);
+    });
     ul.appendChild(list);
 }
 async function GuardarProducto() {
     if (precioValido()) {
-        await fetch(urlProductos,
+        const response = await fetch(urlProductos,
             {
                 method: 'POST',
                 headers: {
@@ -32,17 +28,13 @@ async function GuardarProducto() {
                     precio: $('#txtPrice').val(),
                 })
             }
-        ).then((response) => {
-            return response.json();
-        })
-            .then((data) => {
-                if (data.success == true) {
-                    alert(data.message)
-                    $('table').append(productoAColumna(data.result));
-                    document.getElementById("txtPrice").value = "";
-                }
-                else alert("Se ha producido un error al guardar")
-            })
+        )
+        const data = await response.json();
+        if (data.success) {
+            $('table').append(productoAColumna(data.result));
+            document.getElementById("txtPrice").value = "";
+        }
+        alert(data.message);
     }
     else
         alert("Verifique el monto ingresado")
@@ -50,23 +42,19 @@ async function GuardarProducto() {
 async function BuscarPorPresupuesto() {
     let presupuesto = $('#txtPresupuesto').val();
 
-    if (presupuestoValido()) {
-        await fetch(urlProductos + `search?presupuesto=${presupuesto}`,
-        ).then((response) => {
-            return response.json();
-        })
-            .then((data) => {
-                $('ul').empty();
-                var table = document.createElement('table');
-                data.map(function (producto) {
-                    let columna = productoAColumna(producto)
-                    table.appendChild(columna);
-                    list.appendChild(table);
-                });
-            })
-        ul.appendChild(list);
-
-    }
-    else
+    if (!presupuestoValido()) {
         alert("Verifique el monto ingresado")
+        return
+    }
+
+    const response = await fetch(urlProductos + `search?presupuesto=${presupuesto}`)
+    const data = await response.json();
+    $('ul').empty();
+    const table = document.createElement('table');
+    data.map((producto) => {
+        let columna = productoAColumna(producto)
+        table.appendChild(columna);
+        list.appendChild(table);
+    });
+    ul.appendChild(list);
 }
